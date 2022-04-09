@@ -1,0 +1,420 @@
+---
+title: "Family characteristics influence the 1990s generation of newborns' immunization in the Philippines"
+author: "Chenyu Lin, Yijun Shen, Yuping Hao"
+date: "April 8 2022"
+abstract: "In 1998 NDHS gathered information on immunization coverage for all children born within the five years including their vaccination of  Tuberculosis (BCG), measles, diphtheria, pertussis, tetanus (DPT), and polio. The birth order, residence and mother's education level shows a strong relation to the infants' immunization rate. The earlier birth order, urban residency and higher mother's education benefit the health of newborns. To enhance further vaccine equality and ensure every infants receive full immunization at the recommended time, NDHS should probably promote the awareness of the infant's family in importance of immunization."
+fontsize: 12pt
+thanks: "Code and data are available at: https://github.com/ChrisL00/Paper4.git"
+output: 
+  pdf_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+bibliography: references.bib
+nocie: |
+  @sanchezschmitz_2011_development, @okafor_2020_bacillus , @roy_2019_potential, @riederer_101, @mbuyakala_2021_measles, @worldhealthorganizationwho_2019_questions, @neilandrewcameron_1984_the, @ventola_2016_immunization
+---
+
+
+\newpage
+
+
+
+# Introduction
+
+Immunization is our very first step into the new world. At the moment that we are born, the midwife will give us the first dose of the HepB vaccine to help us build immunity against the Hepatitis B virus. Later in the first three years, a variety of vaccines will be injected into the babies' bodies to help them prepare for the upcoming challenges from viruses and bacteria that might cause death threats and even lifelong sequelae if they are not vaccinated.   
+  
+Infants are especially vulnerable to virus infections; that's why protecting them with vaccine immunizations is one of the most important things for society. In 1998, the NDHS (National Demographic and Health Survey) especially used a section to investigate infant immunization for babies born in 1993 to 1998, those who were born at most five years before the survey. They checked into these infant vaccines: tuberculosis (BCG), measles, diphtheria, pertussis, tetanus (DPT), and polio. They also recorded the family and parents' background characteristics to see if these characteristics influenced the vaccinations, which included birth order, family residence, regions, and the mother's education. The data will be explained in detail in the Data section, including how it was collected and what we can learn from it. 
+  
+This paper is mainly divided into four parts. First, in the data section, the table data is introduced, together with the survey methodology and the variable definitions. Then the cleaned data will be visualized and interpreted in the Results section. Third, in the Discussion section, there will be some conclusive insights, useful measures to help more newborns be immunized, and future steps that people might try. Finally, in the appendix, the completed data sheet (Gebru et al., 2021) will be attached, along with the supplementary survey that the table is related to.  
+  
+In this paper, we use the R language [@R] to analyze the data, during the process, we also used a lot of package to analyze the data, such as readr[@readr], tidyverse[@tidyverse], reshape[@reshape] and ggplot[@ggplot].
+
+\newpage
+
+  
+# Looking into the data  
+##  Survey Methodology  
+The 1998 NDHS gathered information on immunization coverage for all children born within the five years before the survey to aid in the national evaluation of the Expanded Program on Immunization (EPI), which includes the whole population of the nation. Tuberculosis (BCG), measles, diphtheria, pertussis, tetanus (DPT), and polio are especially investigated in the survey.   
+
+The mother, who had a child, was asked if she had a health card for each of her children, and if she did, the interviewer requested the family to show it. If a mother could provide the interviewer with her baby's health record card, the interviewer transcribed the vaccination dates from the card onto the questionnaire and recorded all the vaccine immunization information. Some other details, such as the babies' gender, the birth order of the children, and the family residence, were also documented.  
+
+There were also a large number of children who had never received a health immunization card or whose mother was unable to show the card to the interviewer. Actually, only 41 percent of children had health cards, which gave the interviewer a valuable piece of written evidence. And for the last 59% of children, the mother was asked if the child had received vaccinations against specific diseases. The information mostly depended on the mother's memory and report.  
+
+According to the EPI program, basic infant immunizations, including one dose of BCG, one dose of measles, three doses of DPT, and three doses of polio vaccine, must be taken before each infant turns one year old. If these basic vaccines are successfully given to a child within this time, he or she is considered to be fully vaccinated. And this is also the main aim of the EPI program, that is, to ensure every child receives the full dose of vaccines at the right time.   
+
+Table 1 (C. Lee Ventola, 2016;Chika N et al.,2022; Partho Roy et al., 2019) lists the appropriate vaccination time, vaccination effects and the Decline in the Morbidity of Diseases due to Vaccination of  BCG, measles, DPT (three doses), and polio(three doses).  
+
+\newpage
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+res <- data.frame(Vaccines=c("BCG", "Measles", "DPT (three doses)", "Polio (three doses)"), 
+                  Time=c("At birth", "In USA, given at 12-15 months; in Phillipines,given before one year old", "When at two, four and six months","When at two, four and six-eighteen months"),
+                  Effects=c("Prevent tuberculosis and other mycobacterial infections", "Prevent measles, mumps, rubella, and chickenpox","Prevent diphtheria, pertussis (whooping cough), and tetanus", "Prevent poliovirus"),
+                  "MorbidityDecline" = c("94%","99.9%","100.0%","100.0%"))
+                  
+knitr::kable(res, caption="Infant vaccination time, the vaccination effects and the Decline in the Morbidity of Diseases due to Vaccination (Vaccination time may vary by different countries)",align = "clllc")
+```
+
+Receiving the correct dose of the vaccine at the recommended time is crucial. Any late vaccination may result in reduced efficacy of the vaccination, interfere with subsequent vaccinations and, most seriously, may result in the risk of exposure to the life-threating virus. This makes the nationwide vaccination so urgent and important. However, according to the survey results, only 73 percent of children are fully immunized.  
+
+\newpage  
+## Cleaned Table  
+The cleaned table is as follows:  
+
+Table 2 shows the percentages of infants who received vaccines for DPT (1, 2, or 3 doses), polio (1, 2, or 3 doses), and measles vaccines. The columns include different vaccine types. The rows have shown the family characteristics categorized by the babies' gender, the birth order of the children, the family residence, and the education level of the mother.  
+
+Table 3 shows the percentages of infants who received full immunization, no immunization, percentage of infants who had a health card, and number of children under certain background characteristics. The rows have shown the family characteristics categorized by the babies' gender, the birth order of the children, the family residence, and the education level of the mother.  
+
+ 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+data <- read.csv(file="D:/304/Paper4/outputs/data/cleaned_data.csv")
+library(tidyverse)
+#data %>% 
+ # rename(
+  #  Card.Per = Percentage.of.a.card,
+   # Number = Number.of.Children
+    #)
+names(data)[names(data) == "Percentage.of.a.card"] <- " Card.Per"
+names(data)[names(data) == "Number.of.Children"] <- "Number"
+
+knitr::kable(data[,1:8], caption="Infant vaccination percentage of DPT (3 doses),Polio(3 doses) and Measles vaccines")
+
+```
+\newpage
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+knitr::kable(data[,9:12], caption="Infant vaccination percentage of full immunization, no inmmunization, percentage of having a health card and number of background characteristics")
+```
+\newpage
+
+# Results
+```{r, echo=FALSE, warning=FALSE, message=FALSE,results="hide"}
+data <- read.csv(file="D:/304/Paper4/outputs/data/cleaned_data.csv")
+
+data1 <- data[1:2,1:11]
+library(tidyverse)
+library(reshape2)
+
+data1 %>% 
+  rownames_to_column() %>% 
+  gather(variable, value, -rowname) %>% 
+  spread(rowname, value)
+```
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+data1 <- melt(data1,id.vars = 'X')
+ggplot(data1,aes(X,value))+
+  geom_bar(aes(fill = variable),
+           stat = 'identity',color = 'black',
+           position = position_dodge(width = 0.6),
+           width = 0.5,size = 0.5)+
+  labs(x="Gender",y="Percentage",title = "Figure 1. Infants vaccination percentage categorized by gender")
+data1 <- melt(data1,id.vars = 'X')
+
+
+```
+
+There was no significant difference in the vaccination status of newborns by gender. In general, for the same vaccine, male infants were vaccinated very similarly to female infants. For Polio3 and DPT3, both of which have lower vaccination rates, males and females showed consistency here. For infants who did not receive a single dose of the vaccine, the rate was slightly higher for males.  
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE,results="hide"}
+data2 <- data[3:6,1:11]
+library(tidyverse)
+library(reshape2)
+
+data2 %>% 
+  rownames_to_column() %>% 
+  gather(variable, value, -rowname) %>% 
+  spread(rowname, value)
+```
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+data2 <- melt(data2,id.vars = 'X')
+ggplot(data2,aes(X,value))+
+  geom_bar(aes(fill = variable),
+           stat = 'identity',color = 'black',
+           position = position_dodge(width = 0.6),
+           width = 0.5,size = 0.5)+
+  labs(x="Birth order",y="Percentage",title = "Figure 2. Infants vaccination percentage categorized by birth order")
+
+```
+In terms of birth order, the vaccination of newborns shows a certain pattern. As birth order goes up, the later the child is born, the more likely it is that he or she will be influenced by a reduced probability of vaccination. Also, as birth order increases, the probability of children without immunization gradually increases, showing a strong positive correlation. This may caused by the economic pressure or reduced parenting time associated with multi-child families.  
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE,results="hide"}
+data3 <- data[7:8,1:11]
+library(tidyverse)
+library(reshape2)
+
+data3 %>% 
+  rownames_to_column() %>% 
+  gather(variable, value, -rowname) %>% 
+  spread(rowname, value)
+```
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+data3 <- melt(data3,id.vars = 'X')
+ggplot(data3,aes(X,value))+
+  geom_bar(aes(fill = variable),
+           stat = 'identity',color = 'black',
+           position = position_dodge(width = 0.6),
+           width = 0.5,size = 0.5)+
+  labs(x="Residence",y="Percentage",title = "Figure 3. Infants vaccination percentage categorized by residence")
+
+```
+For different residence, urban-born children have better immunization status than the rural-born children. For  BCG, DPT (1, 2, or 3 doses), polio (1, 2, or 3 doses), and measles, this pattern could be shown in Figure 3.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE,results="hide"}
+data4 <- data[25:28,1:11]
+library(tidyverse)
+library(reshape2)
+
+data4 %>% 
+  rownames_to_column() %>% 
+  gather(variable, value, -rowname) %>% 
+  spread(rowname, value)
+```
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+data4 <- melt(data4,id.vars = 'X')
+ggplot(data4,aes(X,value))+
+  geom_bar(aes(fill = variable),
+           stat = 'identity',color = 'black',
+           position = position_dodge(width = 0.6),
+           width = 0.5,size = 0.5)+
+  labs(x="Mother's education",y="Percentage",title = "Figure 4. Infants vaccination percentage categorized by mother's education")
+
+```
+The educational level of mothers also increased the rate of vaccination of children. In terms of the four education levels, no education, primary education, high school education, and college or higher, the higher the education level of mothers, the better their children's vaccination percentage will be. This may be related to the mother's earning level, scientific knowledge, etc.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE,results="hide"}
+data5 <- data[9:24,1:11]
+library(tidyverse)
+library(reshape2)
+
+data5 %>% 
+  rownames_to_column() %>% 
+  gather(variable, value, -rowname) %>% 
+  spread(rowname, value)
+```
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+data5 <- melt(data5,id.vars = 'X')
+ggplot(data5,aes(X,value))+
+  geom_bar(aes(fill = variable),
+           stat = 'identity',color = 'black',
+           position = position_dodge(width = 2),
+           width = 0.5,size = 0.5)+
+  labs(x="Region",y="Percentage",title = "Figure 5. Infants vaccination percentage categorized by Region")+ coord_flip()
+
+```
+
+\newpage
+# Discussion 
+## Conclusions in vaccine types
+Regardless of all kinds of family background characteristics, there are a few overall patterns in vaccination percentage in Table 2 and Table 3. The vaccines that require more than one dose result in a lower vaccination percentage than the one-dose shot. The BCG vaccine seems to have the highest vaccination percentage of all the fully-injected vaccines for all backgrounds. This may be due to the time that BCG is vaccinated, the moment when the child is born, whereas the DPT and polio require three injections, and measles is usually injected later than 9 months. The coverage rate for the first dose of DPT is also very close to, or sometimes higher than, the BCG coverage rate, which is close to about 90% coverage. Approximately 72.8 percent of children are fully vaccinated, which is slightly higher than previous EPI data.      
+
+The reason why the number of people who receive the measles vaccine couldn’t reach other kinds of vaccine is probably that the measles vaccine is normally given at nine to twelve months. Its late injection may be the reason that it has a lower vaccination rate than others. However, the question of low measles vaccination has seen its negative impact on the Philippines' society (FM Domai et al., 2022). From 2017 to 2019, the Philippines was hit by the largest measles outbreak in the World Health Organization (WHO) Western Pacific region. This pandemic has confirmed about 31,056 cases with more than 400 deaths, among which the most fatal cases were young children. Children under the age of 9 months account for 41% of all deaths (FM Domai et al., 2022). At that time, the measles vaccination rate had dropped to 75%, even lower than the 78.9% that was investigated in this survey in 1998. The declining measles vaccination rate has presented the Philippine society with a significant challenge in protecting their young generation from the dangers of tuberculosis and other mycobacterial infections.  
+
+There are mainly two problems that can be seen from Table 2 and Table 3: children who have never received a vaccine or have not fully received it, as well as the low percentage of kids who have a health card.         
+
+We should be aware that 7.7 percent of children in total have never received any immunizations after birth.This may lead to the potential danger of exposure to some very terrible children's diseases, which may cause paralysis (which the BCG vaccine could prevent) and deaths. It’s very urgent to ensure those children get primary immunizations. The other thing that should be mentioned is that there is about a 10% drop rate between the first dose and the third dose for both DPT vaccines and Polio vaccines. Fully-vaccinated children can’t build enough antibodies to defend themselves against viruses. Just like the COVID-19 vaccines that we have experienced, basically, the first dose of the vaccine starts the process of building up protection, and the second dose induces a strong immune response to greatly reinforce this protection. It’s very essential to make sure the children’s family strictly follows the infants’ vaccination process and schedule. What we can do to ensure this point will be discussed in the further sections.  
+
+And the survey also has a problem with collecting information. Only about 41% of the children whose information was gathered from the data were identified.The rest of the children's immunization records are derived from the parents’ report. Their health card may have gone missing, or they may not have received one at all.This may cause a certain degree of inaccuracy and misreporting of the results in the survey. In the promotion of children's health, the child health card is a relatively accurate and effective written record. It keeps track of birth information, weight gain, immunizations, neurological development, and illness episodes. (1984, Donald PR et al.) It may also play an important role in the early detection and prevention of disease in newborns and children in some cases. The immunization information of children may be benefited by further promoting the application of health cards.    
+
+## Looking into the family background characteristics
+In the results section, the five main family background characteristics have been separately visualized and briefly concluded: gender, birth order, residence, mother’s education level, and family region.  
+
+Among these five characteristics, the plot shows that there is no strong significance for different genders. In general, for the same vaccine, the coverage rate of male infants' vaccination is very similar to that of female infants.  
+
+When looking into the birth orders, the later the child is born, the more likely he or she will not be fully vaccinated. The vaccine coverage rate has a strong negative association with birth order. And the percentage of infants who have never received vaccinations but are the sixth child of the family or later has increased by four times more than those who are the first born. Why do later-born children have worse vaccinations than the early-born? The reason might be the parenting time. The mothers from larger families would have had less for each individual. And the financial strain of having more kids may cause parents to spend more time at work, thus decreasing the time with their children. The neglance of children’s immunization is induced under these conditions.  
+
+In terms of residence, urban-born children have better immunization status than the rural-born children. A better medical system with a higher density of vaccination clinics may lead to more convenient injections. For families living in rural areas, the long distance from home to the clinic may make parents hesitant about whether to spend the time getting their children vaccinated. In addition, the importance of vaccination is less publicized in rural areas than in urban areas. This may also make the families less aware of the significance of vaccination. To some extent, this is also potentially relevant to the mother's education level, which we discuss below.   
+
+The educational level of mothers increased the rate of vaccination of children. In terms of the four education levels (no education, primary education, high school education, and college or higher), the higher the education level of mothers, the better their children’s vaccination percentage will be. The higher the level of education the mother has, the more likely she will vaccinate her child. This might be because some mothers of lower education couldn’t fully acknowledge the role vaccines play in their children’s immunizations or have concerns about vaccine safety. And whether mothers are employed and have access to a regular monthly income may also possibly contribute to the higher vaccination rate.  
+
+## Weaknesses and next steps
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+res <- data.frame(Reasons=c("Unaware of need for immunization","Unaware of need to return for second or third dose ","Fear of side effects, wrong ideas about contraindieations ","Postponed until another time ","No faith in immunization ","Rumors ","Place of immunization too far ","Time for immunization inconvenient ","Vaccinator absent ","Mother too busy ","Family problem, including illness of mother ","Child ill - not brought ","Child ill - brought but not given immunization ","Long waiting time ","Other ","No reason given"), 
+                  Percents=c("4.3","2.2","9.2","6.9","5.5","1.3","15.5","2.6","2.0","13.2","1.3","9.9","1.8","1.0","10.5","29.7"))
+                  
+knitr::kable(res, caption="Reasons for children's non-immunization",align = "lc")
+```
+Table 4 lists the most common reasons for parents' failure to bring their children to get vaccination. The inconvenience of going to a health facility or finding the time to accompany the child to the clinic appears to be the major impediment to completing the basic immunization among the sixteen reasons.  
+
+To find a solution to the inconvenience of getting to a health facility, the easiest way could be to open more vaccination sites, whether temporary or permanent. Alternatively, the Department of Health could give some small payments to encourage families to get their kids vaccinated or to cover the transportation fee for taking a ride. The health department of the Philippines could also organize some regular vaccination campaigns in those rural areas where the vaccination sites are limited. Financial incentives may be helpful to those families who have transportation problems.  
+
+Some parents have difficulty finding the time to accompany their children to the clinic. To address this, the clinic could probably add extra time on weekday nights or weekends. The regular time may have conflicted with the parents' working time. This extra time could help them better arrange vaccination appointments. Financial incentives also work for families in poverty to cover the loss of family income from taking their children to clinics. Working parents should be able to attend clinic or health facility hours that are convenient for them. Every community should have at least one 'walk-in' clinic that could provide children's vaccines without an appointment on specific days. This could make it easier for parents to get their children vaccinated.  
+
+In summary, there are a variety of ways to increase coverage rates for children's vaccinations. The important thing is to get all the infants to receive the appropriate vaccine at the right time. As Nelson Mandela has said, it's impossible until it's done.  
+
+
+
+\newpage
+# Appendix  
+## Datasheet(Gebru et al., 2021)
+
+**Motivation**
+
+1. *For what purpose was the dataset created? Was there a specific task in mind? Was there a specific gap that needed to be filled? Please provide a description.*
+    - The dataset was created to enable an analysis of infants' immunization in the Philippines in 1998.Using this dataset, the background characteristic that most influence the vaccination of the newborns could be illustrated.   
+2. *Who created the dataset (for example, which team, research group) and on behalf of which entity (for example, company, institution, organization)?*
+    - National Demographic and Health Survey group including the National Statistics Office, Department of Health, and Macro International Inc. On behalf of the Republic of Phillipines.  
+3. *Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number.*
+    - The National Statistics Office and Department of Health.
+4. *Any other comments?*
+    - No.
+
+**Composition**
+
+1. *What do the instances that comprise the dataset represent (for example, documents, photos, people, countries)? Are there multiple types of instances (for example, movies, users, and ratings; people and interactions between them; nodes and edges)? Please provide a description.*
+	- People and family. 
+2. *How many instances are there in total (of each type, if appropriate)?*
+	- 1474.
+3. *Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set? If the dataset is a sample, then what is the larger set? Is the sample representative of the larger set (for example, geographic coverage)? If so, please describe how this representativeness was validated/verified. If it is not representative of the larger set, please describe why not (for example, to cover a more diverse range of instances, because instances were withheld or unavailable).*
+	- No.
+4. *What data does each instance consist of? "Raw" data (for example, unprocessed text or images) or features? In either case, please provide a description.*
+	- The national survey.
+5. *Is there a label or target associated with each instance? If so, please provide a description.*
+	- No
+6. *Is any information missing from individual instances? If so, please provide a description, explaining why this information is missing (for example, because it was unavailable). This does not include intentionally removed information, but might include, for example, redacted text.*
+	- No
+7. *Are relationships between individual instances made explicit (for example, users' movie ratings, social network links)? If so, please describe how these relationships are made explicit.*
+	- No
+8. *Are there recommended data splits (for example, training, development/validation, testing)? If so, please provide a description of these splits, explaining the rationale behind them.*
+	- No
+9. *Are there any errors, sources of noise, or redundancies in the dataset? If so, please provide a description.*
+	- NO
+10. *Is the dataset self-contained, or does it link to or otherwise rely on external resources (for example, websites, tweets, other datasets)? If it links to or relies on external resources, a) are there guarantees that they will exist, and remain constant, over time; b) are there official archival versions of the complete dataset (that is, including the external resources as they existed at the time the dataset was created); c) are there any restrictions (for example, licenses, fees) associated with any of the external resources that might apply to a dataset consumer? Please provide descriptions of all external resources and any restrictions associated with them, as well as links or other access points, as appropriate.*
+	- It is stored on the website. I recommend people who use this dataset have a copy at their local environment.
+11. *Does the dataset contain data that might be considered confidential (for example, data that is protected by legal privilege or by doctor-patient confidentiality, data that includes the content of individuals' non-public communications)? If so, please provide a description.*
+	- NO
+12. *Does the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise cause anxiety? If so, please describe why.*
+	- NO
+13. *Does the dataset identify any sub-populations (for example, by age, gender)? If so, please describe how these subpopulations are identified and provide a description of their respective distributions within the dataset.*
+	- NO
+14. *Is it possible to identify individuals (that is, one or more natural persons), either directly or indirectly (that is, in combination with other data) from the dataset? If so, please describe how.*
+	- NO
+15. *Does the dataset contain data that might be considered sensitive in any way (for example, data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)? If so, please provide a description.*
+	- NO
+16. *Any other comments?*
+	- No
+
+**Collection process**
+
+1. *How was the data associated with each instance acquired? Was the data directly observable (for example, raw text, movie ratings), reported by subjects (for example, survey responses), or indirectly inferred/derived from other data (for example, part-of-speech tags, model-based guesses for age or language)? If the data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified? If so, please describe how.*
+	- reported by subjects, i.e. survey responses.
+2. *What mechanisms or procedures were used to collect the data (for example, hardware apparatuses or sensors, manual human curation, software programs, software APIs)? How were these mechanisms or procedures validated?*
+	- manual human collection.
+3. *If the dataset is a sample from a larger set, what was the sampling strategy (for example, deterministic, probabilistic with specific sampling probabilities)?*
+	- NO
+4. *Who was involved in the data collection process (for example, students, crowdworkers, contractors) and how were they compensated (for example, how much were crowdworkers paid)?*
+	- Survey group numbers. How they are paid is unknown.  
+5. *Over what timeframe was the data collected? Does this timeframe match the creation timeframe of the data associated with the instances (for example, recent crawl of old news articles)? If not, please describe the timeframe in which the data associated with the instances was created.*
+	- NO
+6. *Were any ethical review processes conducted (for example, by an institutional review board)? If so, please provide a description of these review processes, including the outcomes, as well as a link or other access point to any supporting documentation.*
+	- Yes I suppose.
+7. *Did you collect the data from the individuals in question directly, or obtain it via third parties or other sources (for example, websites)?*
+	- Yes.
+8. *Were the individuals in question notified about the data collection? If so, please describe (or show with screenshots or other information) how notice was provided, and provide a link or other access point to, or otherwise reproduce, the exact language of the notification itself.*
+	- Yes.
+9. *Did the individuals in question consent to the collection and use of their data? If so, please describe (or show with screenshots or other information) how consent was requested and provided, and provide a link or other access point to, or otherwise reproduce, the exact language to which the individuals consented.*
+	- Yes.
+10. *If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent in the future or for certain uses? If so, please provide a description, as well as a link or other access point to the mechanism (if appropriate).*
+	-Yes.
+11. *Has an analysis of the potential impact of the dataset and its use on data subjects (for example, a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation.*
+	- TBD.
+12. *Any other comments?*
+	- NO
+
+**Preprocessing/cleaning/labeling**
+
+1. *Was any preprocessing/cleaning/labeling of the data done (for example, discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)? If so, please provide a description. If not, you may skip the remaining questions in this section.*
+	- Yes.It's uploaded in github.
+2. *Was the "raw" data saved in addition to the preprocessed/cleaned/labeled data (for example, to support unanticipated future uses)? If so, please provide a link or other access point to the "raw" data.*
+	- Yes.It's uploaded in github.
+3. *Is the software that was used to preprocess/clean/label the data available? If so, please provide a link or other access point.*
+	- Yes. It's uploaded in github.
+4. *Any other comments?*
+	- NO
+
+**Uses**
+
+1. *Has the dataset been used for any tasks already? If so, please provide a description.*
+	- NO
+2. *Is there a repository that links to any or all papers or systems that use the dataset? If so, please provide a link or other access point.*
+	- NO
+3. *What (other) tasks could the dataset be used for?*
+	- NO
+4. *Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (for example, stereotyping, quality of service issues) or other risks or harms (for example, legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?*
+	- NO
+5. *Are there tasks for which the dataset should not be used? If so, please provide a description.*
+	- NO
+6. *Any other comments?*
+	- NO
+
+**Distribution**
+
+1. *Will the dataset be distributed to third parties outside of the entity (for example, company, institution, organization) on behalf of which the dataset was created? If so, please provide a description.*
+	- NO
+2. *How will the dataset be distributed (for example, tarball on website, API, GitHub)? Does the dataset have a digital object identifier (DOI)?*
+	- NO
+3. *When will the dataset be distributed?*
+	- NO
+4. *Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? If so, please describe this license and/ or ToU, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms or ToU, as well as any fees associated with these restrictions.*
+	- NO
+5. *Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms, as well as any fees associated with these restrictions.*
+	- NO
+6. *Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any supporting documentation.*
+	- NO
+7. *Any other comments?*
+	- NO
+
+**Maintenance**
+
+1. *Who will be supporting/hosting/maintaining the dataset?*
+	- DHSprogram
+2. *How can the owner/curator/manager of the dataset be contacted (for example, email address)?*
+	- dhsprogram.com
+3. *Is there an erratum? If so, please provide a link or other access point.*
+	- NO
+4. *Will the dataset be updated (for example, to correct labeling errors, add new instances, delete instances)? If so, please describe how often, by whom, and how updates will be communicated to dataset consumers (for example, mailing list, GitHub)?*
+	- NO
+5. *If the dataset relates to people, are there applicable limits on the retention of the data associated with the instances (for example, were the individuals in question told that their data would be retained for a fixed period of time and then deleted)? If so, please describe these limits and explain how they will be enforced.*
+	- NO
+6. *Will older versions of the dataset continue to be supported/hosted/maintained? If so, please describe how. If not, please describe how its obsolescence will be communicated to dataset consumers.*
+	- NO
+7. *If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If so, please provide a description. Will these contributions be validated/verified? If so, please describe how. If not, why not? Is there a process for communicating/distributing these contributions to dataset consumers? If so, please provide a description.*
+	- NO
+8. *Any other comments?*
+	- NO
+
+
+\newpage
+
+
+## Survey questions related to dataset  
+Original questions could be found at: https://dhsprogram.com/pubs/pdf/FR103/FR103.pdf.  
+The original questions that dataset includes are in Section 4B: Immunization and Health.From Page 245 to 248, Question 449 to 457U.     
+  
+```{r,echo=FALSE, fig.align='center'}
+# screenshot for the survey
+knitr::include_graphics("Q1.png")
+knitr::include_graphics("Q2.png")
+knitr::include_graphics("Q3.png")
+```
+\newpage
+```{r,echo=FALSE, fig.align='center'}
+knitr::include_graphics("Q4.png")
+```
+\newpage
+  
+# References
+
